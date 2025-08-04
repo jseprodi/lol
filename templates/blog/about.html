@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">About The Author</h1>
+                
+                <div class="text-center mb-4">
+                    <i class="fas fa-blog text-primary" style="font-size: 4rem;"></i>
+                </div>
+
+                <p class="lead">
+                    I'm tired of this, Grandpa.
+                </p>
+
+                <h3>Features</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Maximum Ennui</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Tiresome Histronics</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Full Volume Self-Loathing</li>
+                </ul>
+
+                <h3>Technology Stack</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>Backend:</strong> Mostly Fear</li>
+                            <li><strong>Database:</strong> Useless Trivia</li>
+                            <li><strong>Frontend:</strong> Mess</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
