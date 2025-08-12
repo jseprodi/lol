@@ -110,6 +110,7 @@ class VercelHandler(BaseHTTPRequestHandler):
                     <li>Database Status: {db_status}</li>
                 </ul>
                 <p><a href="/test-django">Test Django</a></p>
+                <p><a href="/test-db">Test Database Connection</a></p>
                 <p><a href="/admin">Test Django Admin</a></p>
                 '''
                 
@@ -136,6 +137,89 @@ class VercelHandler(BaseHTTPRequestHandler):
                     self.send_header('Content-Type', 'text/plain')
                     self.end_headers()
                     self.wfile.write(f'Django test failed: {str(e)}'.encode())
+                    return
+            
+            # Database test route
+            if path == '/test-db':
+                try:
+                    import psycopg2
+                    from urllib.parse import urlparse
+                    
+                    db_url = os.environ.get('DATABASE_URL')
+                    if not db_url:
+                        self.send_response(500)
+                        self.send_header('Content-Type', 'text/plain')
+                        self.end_headers()
+                        self.wfile.write(b'No DATABASE_URL found')
+                        return
+                    
+                    # Parse the connection string
+                    parsed = urlparse(db_url)
+                    
+                    # Test connection with detailed error reporting
+                    try:
+                        conn = psycopg2.connect(
+                            host=parsed.hostname,
+                            port=parsed.port,
+                            database=parsed.path[1:],
+                            user=parsed.username,
+                            password=parsed.password,
+                            connect_timeout=10
+                        )
+                        conn.close()
+                        
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'text/html')
+                        self.end_headers()
+                        self.wfile.write(b'<h1>Database Connection Successful!</h1><p>Supabase is working!</p>')
+                        return
+                        
+                    except psycopg2.OperationalError as e:
+                        self.send_response(500)
+                        self.send_header('Content-Type', 'text/html')
+                        self.end_headers()
+                        error_html = f'''
+                        <h1>Database Connection Failed</h1>
+                        <h2>Error Type: OperationalError</h2>
+                        <p><strong>Error:</strong> {str(e)}</p>
+                        <h3>Connection Details:</h3>
+                        <ul>
+                            <li>Host: {parsed.hostname}</li>
+                            <li>Port: {parsed.port}</li>
+                            <li>Database: {parsed.path[1:]}</li>
+                            <li>User: {parsed.username}</li>
+                            <li>Password: {"***" if parsed.password else "None"}</li>
+                        </ul>
+                        <p><strong>Common Solutions:</strong></p>
+                        <ul>
+                            <li>Check if Supabase is running</li>
+                            <li>Verify firewall settings allow Vercel IPs</li>
+                            <li>Check if database exists</li>
+                            <li>Verify credentials are correct</li>
+                        </ul>
+                        '''
+                        self.wfile.write(error_html.encode())
+                        return
+                        
+                    except Exception as e:
+                        self.send_response(500)
+                        self.send_header('Content-Type', 'text/html')
+                        self.end_headers()
+                        error_html = f'''
+                        <h1>Database Connection Failed</h1>
+                        <h2>Error Type: {type(e).__name__}</h2>
+                        <p><strong>Error:</strong> {str(e)}</p>
+                        <h3>Full Traceback:</h3>
+                        <pre>{traceback.format_exc()}</pre>
+                        '''
+                        self.wfile.write(error_html.encode())
+                        return
+                        
+                except Exception as e:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(f'Database test setup failed: {str(e)}'.encode())
                     return
             
             # Read request body for POST
