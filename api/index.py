@@ -48,6 +48,14 @@ class VercelHandler(BaseHTTPRequestHandler):
             parsed_url = urlparse(self.path)
             path = parsed_url.path
             
+            # For now, let's test with a simple response to see if the handler works
+            if path == '/':
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b'<h1>Hello from Vercel!</h1><p>Handler is working. Now testing Django...</p>')
+                return
+            
             # Read request body for POST
             content_length = int(self.headers.get('Content-Length', 0))
             
