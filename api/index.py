@@ -55,8 +55,8 @@ class VercelHandler(BaseHTTPRequestHandler):
                 from io import BytesIO
                 wsgi_input = BytesIO(b'')
             
-            # Create a Django-compatible request
-            django_request = WSGIRequest({
+            # Create a Django-compatible request environment
+            environ = {
                 'REQUEST_METHOD': method,
                 'PATH_INFO': path,
                 'QUERY_STRING': parsed_url.query,
@@ -74,7 +74,10 @@ class VercelHandler(BaseHTTPRequestHandler):
                 'wsgi.multithread': False,
                 'wsgi.multiprocess': False,
                 'wsgi.run_once': True,
-            })
+            }
+            
+            # Create Django request object
+            django_request = WSGIRequest(environ)
             
             # Create a start_response callable for WSGI
             def start_response(status, headers, exc_info=None):
