@@ -96,6 +96,8 @@ class VercelHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     db_status = f"Connection failed: {str(e)}"
                     print(f"Database connection error: {e}")  # Add logging
+                    import traceback
+                    print(f"Full traceback: {traceback.format_exc()}")
                 
                 response_html = f'''
                 <h1>Hello from Vercel!</h1>
@@ -116,6 +118,25 @@ class VercelHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(response_html.encode())
                 return
+            
+            # Test Django route
+            if path == '/test-django':
+                try:
+                    # Try to create a simple Django response
+                    from django.http import HttpResponse
+                    response = HttpResponse('<h1>Django is working!</h1><p>This is a Django response.</p>')
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(response.content)
+                    return
+                except Exception as e:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(f'Django test failed: {str(e)}'.encode())
+                    return
             
             # Read request body for POST
             content_length = int(self.headers.get('Content-Length', 0))
