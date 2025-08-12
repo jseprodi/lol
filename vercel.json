@@ -7,8 +7,19 @@
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "/media/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "blog_project/wsgi.py"
     }
-  ]
+  ],
+  "env": {
+    "PYTHONPATH": "."
+  }
 } 

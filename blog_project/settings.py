@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-tzwgk#3j#%c3(h6$!)j_yyznhy%t#vpx97o5=edut4^kjfa)&w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEVELOPMENT' in os.environ
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'joshua-seprodi.com', 'www.joshua-seprodi.com', '.vercel.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'joshua-seprodi.com', 'www.joshua-seprodi.com', '.vercel.app', '*']
 
 
 # Application definition
@@ -139,3 +139,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Serverless-specific settings
+if 'VERCEL' in os.environ:
+    # Disable sessions for serverless
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+    
+    # Use in-memory cache for serverless
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    
+    # Disable file uploads temporarily (will need cloud storage)
+    FILE_UPLOAD_HANDLERS = []
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = '/tmp/media/'
