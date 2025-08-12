@@ -12,6 +12,14 @@ sys.path.insert(0, str(project_root))
 # Set Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blog_project.settings')
 
+# Set minimum required environment variables if not present
+if 'SECRET_KEY' not in os.environ:
+    os.environ['SECRET_KEY'] = 'django-insecure-development-key-change-in-production'
+if 'DEBUG' not in os.environ:
+    os.environ['DEBUG'] = 'True'
+if 'VERCEL' not in os.environ:
+    os.environ['VERCEL'] = 'True'
+
 # Import Django and configure
 import django
 django.setup()
@@ -97,10 +105,12 @@ class VercelHandler(BaseHTTPRequestHandler):
                 response_iterable.close()
                 
         except Exception as e:
+            import traceback
+            error_details = f'Internal Server Error: {str(e)}\n\nTraceback:\n{traceback.format_exc()}'
             self.send_response(500)
             self.send_header('Content-Type', 'text/plain')
             self.end_headers()
-            self.wfile.write(f'Internal Server Error: {str(e)}'.encode())
+            self.wfile.write(error_details.encode())
 
 # Vercel requires these exports
 handler = VercelHandler
