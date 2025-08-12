@@ -23,7 +23,6 @@ if 'VERCEL' not in os.environ:
 # Test database connection before Django setup
 try:
     import psycopg2
-    from urllib.parse import urlparse
     
     # Parse the DATABASE_URL
     db_url = os.environ.get('DATABASE_URL')
@@ -79,7 +78,6 @@ class VercelHandler(BaseHTTPRequestHandler):
                 db_status = "Unknown"
                 try:
                     import psycopg2
-                    from urllib.parse import urlparse
                     
                     db_url = os.environ.get('DATABASE_URL')
                     if db_url:
