@@ -45,7 +45,15 @@ class VercelHandler(BaseHTTPRequestHandler):
             
             # Read request body for POST
             content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length) if content_length > 0 else b''
+            
+            # Create a file-like object for wsgi.input
+            if content_length > 0:
+                body_bytes = self.rfile.read(content_length)
+                from io import BytesIO
+                wsgi_input = BytesIO(body_bytes)
+            else:
+                from io import BytesIO
+                wsgi_input = BytesIO(b'')
             
             # Create a Django-compatible request
             django_request = WSGIRequest({
@@ -59,7 +67,7 @@ class VercelHandler(BaseHTTPRequestHandler):
                 'HTTP_ACCEPT': self.headers.get('Accept', ''),
                 'CONTENT_TYPE': self.headers.get('Content-Type', ''),
                 'CONTENT_LENGTH': content_length,
-                'wsgi.input': body,
+                'wsgi.input': wsgi_input,
                 'wsgi.url_scheme': 'https',
                 'wsgi.version': (1, 0),
                 'wsgi.errors': sys.stderr,
