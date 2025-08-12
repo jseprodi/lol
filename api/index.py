@@ -16,10 +16,6 @@ django.setup()
 # Import the WSGI application
 from blog_project.wsgi import application
 
-# Vercel handler
-def handler(request, context):
-    """Vercel serverless function handler"""
-    return application(request, context)
-
-# Alternative: direct app export for some Vercel configurations
+# Vercel requires these variables
 app = application
+handler = application

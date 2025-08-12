@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "src": "api/index.py",
+      "src": "blog_project/wsgi.py",
       "use": "@vercel/python"
     }
   ],
@@ -16,7 +16,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.py"
+      "dest": "blog_project/wsgi.py"
     }
   ],
   "env": {
