@@ -95,6 +95,7 @@ class VercelHandler(BaseHTTPRequestHandler):
                         db_status = "No DATABASE_URL"
                 except Exception as e:
                     db_status = f"Connection failed: {str(e)}"
+                    print(f"Database connection error: {e}")  # Add logging
                 
                 response_html = f'''
                 <h1>Hello from Vercel!</h1>
@@ -107,6 +108,7 @@ class VercelHandler(BaseHTTPRequestHandler):
                     <li>Database Status: {db_status}</li>
                 </ul>
                 <p><a href="/test-django">Test Django</a></p>
+                <p><a href="/admin">Test Django Admin</a></p>
                 '''
                 
                 self.send_response(200)
