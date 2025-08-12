@@ -76,15 +76,32 @@ class VercelHandler(BaseHTTPRequestHandler):
                 'wsgi.run_once': True,
             })
             
-            # Process through Django
-            response = application(django_request)
+            # Create a start_response callable for WSGI
+            def start_response(status, headers, exc_info=None):
+                # Parse status code from status string (e.g., "200 OK")
+                status_code = int(status.split()[0])
+                self.send_response(status_code)
+                
+                # Send headers
+                for header, value in headers:
+                    self.send_header(header, value)
+                self.end_headers()
+                
+                return self.wfile.write
             
-            # Send response
-            self.send_response(response.status_code)
-            for header, value in response.items():
-                self.send_header(header, value)
-            self.end_headers()
-            self.wfile.write(response.content)
+            # Process through Django with proper WSGI interface
+            response_iterable = application(django_request, start_response)
+            
+            # Write response content
+            for chunk in response_iterable:
+                if isinstance(chunk, bytes):
+                    self.wfile.write(chunk)
+                else:
+                    self.wfile.write(chunk.encode('utf-8'))
+            
+            # Close the response if it has a close method
+            if hasattr(response_iterable, 'close'):
+                response_iterable.close()
             
         except Exception as e:
             self.send_response(500)
