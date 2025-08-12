@@ -20,6 +20,31 @@ if 'DEBUG' not in os.environ:
 if 'VERCEL' not in os.environ:
     os.environ['VERCEL'] = 'True'
 
+# Test database connection before Django setup
+try:
+    import psycopg2
+    from urllib.parse import urlparse
+    
+    # Parse the DATABASE_URL
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        parsed = urlparse(db_url)
+        # Test connection
+        conn = psycopg2.connect(
+            host=parsed.hostname,
+            port=parsed.port,
+            database=parsed.path[1:],  # Remove leading slash
+            user=parsed.username,
+            password=parsed.password
+        )
+        conn.close()
+        print("Database connection successful")
+    else:
+        print("No DATABASE_URL found")
+except Exception as e:
+    print(f"Database connection failed: {e}")
+    # Continue anyway, let Django handle the error
+
 # Import Django and configure
 import django
 django.setup()
@@ -50,10 +75,46 @@ class VercelHandler(BaseHTTPRequestHandler):
             
             # For now, let's test with a simple response to see if the handler works
             if path == '/':
+                # Test database connection
+                db_status = "Unknown"
+                try:
+                    import psycopg2
+                    from urllib.parse import urlparse
+                    
+                    db_url = os.environ.get('DATABASE_URL')
+                    if db_url:
+                        parsed = urlparse(db_url)
+                        conn = psycopg2.connect(
+                            host=parsed.hostname,
+                            port=parsed.port,
+                            database=parsed.path[1:],
+                            user=parsed.username,
+                            password=parsed.password
+                        )
+                        conn.close()
+                        db_status = "Connected successfully"
+                    else:
+                        db_status = "No DATABASE_URL"
+                except Exception as e:
+                    db_status = f"Connection failed: {str(e)}"
+                
+                response_html = f'''
+                <h1>Hello from Vercel!</h1>
+                <p>Handler is working.</p>
+                <h2>Environment Check:</h2>
+                <ul>
+                    <li>SECRET_KEY: {"Set" if os.environ.get('SECRET_KEY') else "Missing"}</li>
+                    <li>DATABASE_URL: {"Set" if os.environ.get('DATABASE_URL') else "Missing"}</li>
+                    <li>VERCEL: {"Set" if os.environ.get('VERCEL') else "Missing"}</li>
+                    <li>Database Status: {db_status}</li>
+                </ul>
+                <p><a href="/test-django">Test Django</a></p>
+                '''
+                
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write(b'<h1>Hello from Vercel!</h1><p>Handler is working. Now testing Django...</p>')
+                self.wfile.write(response_html.encode())
                 return
             
             # Read request body for POST
