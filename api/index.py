@@ -72,6 +72,10 @@ class VercelHandler(BaseHTTPRequestHandler):
             parsed_url = urlparse(self.path)
             path = parsed_url.path
             
+            # Debug logging
+            print(f"Request path: {path}")
+            print(f"Full URL: {self.path}")
+            
             # For now, let's test with a simple response to see if the handler works
             if path == '/':
                 # Test database connection
@@ -221,6 +225,28 @@ class VercelHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(f'Database test setup failed: {str(e)}'.encode())
                     return
+            
+            # Catch-all route for debugging
+            if path.startswith('/debug'):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                debug_html = f'''
+                <h1>Debug Information</h1>
+                <p><strong>Request Path:</strong> {path}</p>
+                <p><strong>Full URL:</strong> {self.path}</p>
+                <p><strong>Method:</strong> {method}</p>
+                <p><strong>Handler Working:</strong> Yes</p>
+                <p><strong>Available Routes:</strong></p>
+                <ul>
+                    <li>/ (root)</li>
+                    <li>/test-django</li>
+                    <li>/test-db</li>
+                    <li>/debug (this page)</li>
+                </ul>
+                '''
+                self.wfile.write(debug_html.encode())
+                return
             
             # Read request body for POST
             content_length = int(self.headers.get('Content-Length', 0))
