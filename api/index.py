@@ -147,7 +147,6 @@ class VercelHandler(BaseHTTPRequestHandler):
             if path == '/test-db':
                 try:
                     import psycopg2
-                    from urllib.parse import urlparse
                     
                     db_url = os.environ.get('DATABASE_URL')
                     if not db_url:
